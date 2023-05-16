@@ -22,11 +22,11 @@ export default function ProductDetails() {
             setQuantity(item.quantity);
         }
 
-        agent.Catalog.details(parseInt(id))
+        id && agent.Catalog.details(parseInt(id))
             .then(response => setProduct(response))
             .catch(error => console.log(error))
             .finally(() => setLoading(false));
-    }, [id, item])
+    }, [id, item]);
 
     function handleInputChange(event: any) {
         if (event.target.value >= 0) {

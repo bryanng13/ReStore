@@ -1,6 +1,6 @@
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { toast } from 'react-toastify';
-import { history } from '../..';
+import { router } from '../router/Routes';
 
 const sleep = () => new Promise(resolve => setTimeout(resolve, 500));
 
@@ -13,7 +13,7 @@ axios.interceptors.response.use(async response => {
     await sleep();
     return response
 }, (error: AxiosError) => {
-    const {data, status} = error.response as any;
+    const {data, status} = error.response as AxiosResponse;
     switch (status) {
         case 400:
             if (data.errors) {
@@ -31,14 +31,12 @@ axios.interceptors.response.use(async response => {
             toast.error(data.title);
             break;
         case 500:
-            history.push({
-                pathname: '/server-error',
-                state: {error: data}
-            });
+            router.navigate('/server-error', {state: {error: data}});
             break;
         default:
             break;
     }
+    
     return Promise.reject(error.response);
 })
 
