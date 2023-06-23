@@ -1,26 +1,24 @@
-using System;
 using API.Data;
-using Microsoft.AspNetCore.Hosting;
+using API.Entities;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 
 namespace API
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var host = CreateHostBuilder(args).Build();
             using var scope = host.Services.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<StoreContext>();
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
             var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
 
             try
             {
-                context.Database.Migrate();
-                DbInitialiser.Initialise(context);
+                await context.Database.MigrateAsync();
+                await DbInitialiser.Initialise(context, userManager);
             }
             catch (Exception ex)
             {
