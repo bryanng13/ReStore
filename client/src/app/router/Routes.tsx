@@ -12,14 +12,19 @@ import App from '../layout/App';
 import Login from '../../features/account/Login';
 import Register from '../../features/account/Register';
 import RequireAuth from './RequireAuth';
+import Orders from '../../features/orders/Orders';
+import OrderDetails from '../../features/orders/OrderDetails';
 
 export const router = createBrowserRouter([
     {
         path: '/',
         element: <App />,
         children: [
+            // These routes deny anonymous users access
             {element: <RequireAuth />, children: [
                 {path: 'checkout', element: <CheckoutPage />},
+                {path: 'orders', element: <Orders />},
+                {path: 'orders/:id', element: <OrderDetails />}
             ]},
             {path: '', element: <HomePage />},
             {path: 'catalog', element: <Catalog />},
