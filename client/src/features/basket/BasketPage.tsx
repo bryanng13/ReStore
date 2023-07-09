@@ -17,6 +17,7 @@ export default function BasketPage() {
                 <Grid item xs={6}>
                     <BasketSummary />
                     <Button 
+                        disabled={basket.items.length === 0}
                         component={Link}
                         to='/checkout'
                         variant='contained'

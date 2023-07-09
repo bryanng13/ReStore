@@ -3,7 +3,6 @@ import AboutPage from '../../features/about/AboutPage';
 import BasketPage from '../../features/basket/BasketPage';
 import Catalog from '../../features/catalog/Catalog';
 import ProductDetails from '../../features/catalog/ProductDetails';
-import CheckoutPage from '../../features/checkout/CheckoutPage';
 import ContactPage from "../../features/contact/ContactPage";
 import HomePage from '../../features/home/HomePage';
 import NotFound from '../errors/NotFound';
@@ -14,6 +13,7 @@ import Register from '../../features/account/Register';
 import RequireAuth from './RequireAuth';
 import Orders from '../../features/orders/Orders';
 import OrderDetails from '../../features/orders/OrderDetails';
+import CheckoutWrapper from '../../features/checkout/CheckoutWrapper';
 
 export const router = createBrowserRouter([
     {
@@ -22,7 +22,7 @@ export const router = createBrowserRouter([
         children: [
             // These routes deny anonymous users access
             {element: <RequireAuth />, children: [
-                {path: 'checkout', element: <CheckoutPage />},
+                {path: 'checkout', element: <CheckoutWrapper />},
                 {path: 'orders', element: <Orders />},
                 {path: 'orders/:id', element: <OrderDetails />}
             ]},
