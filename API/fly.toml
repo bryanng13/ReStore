@@ -1,0 +1,22 @@
+# fly.toml app configuration file generated for restore-udemy on 2023-07-10T23:01:33+10:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = "restore-udemy"
+primary_region = "ams"
+
+[build]
+  image = "bryanng13/restore:latest"
+
+[env]
+  ASPNETCORE_URLS="http://+:8080"
+  StripeSettings__PublishableKey="pk_test_51NR5AIKo8x4IcoHo60mRywrxE6qFgXEQZqcQYyfEhQdI7Gme4KVxFEJNodxfgdYnJJuxoxIhxXErbjDW3AV7TSqT006lwAEsNf"
+  
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ["app"]
