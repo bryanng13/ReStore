@@ -12,7 +12,9 @@ primary_region = "ams"
 [env]
   ASPNETCORE_URLS="http://+:8080"
   StripeSettings__PublishableKey="pk_test_51NR5AIKo8x4IcoHo60mRywrxE6qFgXEQZqcQYyfEhQdI7Gme4KVxFEJNodxfgdYnJJuxoxIhxXErbjDW3AV7TSqT006lwAEsNf"
-  
+  Cloudinary__CloudName="bryten"
+  Cloudinary__ApiKey="432925258774429"
+
 [http_service]
   internal_port = 8080
   force_https = true

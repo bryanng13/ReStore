@@ -3,7 +3,7 @@ import agent from '../../app/api/agent';
 import { Basket } from '../../app/models/basket'
 import { getCookie } from '../../app/util/util';
 
-export interface BasketState {
+interface BasketState {
     basket: Basket | null;
     status: string;
 }
