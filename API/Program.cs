@@ -16,63 +16,66 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddAutoMapper(typeof(MappingProfiles).Assembly);
-
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    var jwtSecurityScheme = new OpenApiSecurityScheme
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        BearerFormat = "JWT",
         Name = "Authorization",
+        Description = "Put Bearer + your token in the box below",
         In = ParameterLocation.Header,
         Type = SecuritySchemeType.ApiKey,
         Scheme = JwtBearerDefaults.AuthenticationScheme,
-        Description = "Put Bearer + your token in the box below",
-        Reference = new OpenApiReference
-        {
-            Id = JwtBearerDefaults.AuthenticationScheme,
-            Type = ReferenceType.SecurityScheme
-        }
-    };
-
-    c.AddSecurityDefinition(jwtSecurityScheme.Reference.Id, jwtSecurityScheme);
-
+    });
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
-            jwtSecurityScheme, Array.Empty<string>()
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Id = JwtBearerDefaults.AuthenticationScheme,
+                    Type = ReferenceType.SecurityScheme
+                },
+                Scheme = "oauth2",
+                Name = "Bearer",
+                In = ParameterLocation.Header
+            },
+            new List<string>()
         }
     });
 });
 
-string connString;
-if (builder.Environment.IsDevelopment())
-    connString = builder.Configuration.GetConnectionString("DefaultConnection");
-else
-{
-    // Use connection string provided at runtime by FlyIO.
-    var connUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
-
-    // Parse connection URL to connection string for Npgsql
-    connUrl = connUrl.Replace("postgres://", string.Empty);
-    var pgUserPass = connUrl.Split("@")[0];
-    var pgHostPortDb = connUrl.Split("@")[1];
-    var pgHostPort = pgHostPortDb.Split("/")[0];
-    var pgDb = pgHostPortDb.Split("/")[1];
-    var pgUser = pgUserPass.Split(":")[0];
-    var pgPass = pgUserPass.Split(":")[1];
-    var pgHost = pgHostPort.Split(":")[0];
-    var pgPort = pgHostPort.Split(":")[1];
-    var updatedHost = pgHost.Replace("flycast", "internal");
-
-    connString = $"Server={updatedHost};Port={pgPort};User Id={pgUser};Password={pgPass};Database={pgDb};";
-}
 builder.Services.AddDbContext<StoreContext>(opt =>
 {
-    opt.UseNpgsql(connString);
-});
+    string connectionString;
+    if (builder.Environment.IsDevelopment())
+    {
+        connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    }
+    else
+    {
+        // Use connection string provided at runtime by FlyIO.
+        var connUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
 
+        // Parse connection URL to connection string for Npgsql
+        connUrl = connUrl.Replace("postgres://", string.Empty);
+        var pgUserPass = connUrl.Split("@")[0];
+        var pgHostPortDb = connUrl.Split("@")[1];
+        var pgHostPort = pgHostPortDb.Split("/")[0];
+        var pgDb = pgHostPortDb.Split("/")[1];
+        var pgUser = pgUserPass.Split(":")[0];
+        var pgPass = pgUserPass.Split(":")[1];
+        var pgHost = pgHostPort.Split(":")[0];
+        var pgPort = pgHostPort.Split(":")[1];
+        var updatedHost = pgHost.Replace("flycast", "internal");
+
+        connectionString = $"Server={updatedHost};Port={pgPort};User Id={pgUser};Password={pgPass};Database={pgDb};";
+    }
+    // Whether the connection string came from the local development configuration file
+    // or from the environment variable from FlyIO, use it to set up your DbContext.
+    opt.UseNpgsql(connectionString);
+});
 
 builder.Services.AddCors();
 builder.Services.AddIdentityCore<User>(opt =>
@@ -113,6 +116,8 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+app.UseRouting();
+
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
@@ -127,7 +132,7 @@ app.UseAuthorization();
 app.MapControllers();
 app.MapFallbackToController("Index", "Fallback");
 
-var scope = app.Services.CreateScope();
+using var scope = app.Services.CreateScope();
 var context = scope.ServiceProvider.GetRequiredService<StoreContext>();
 var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
 var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
@@ -141,4 +146,4 @@ catch (Exception ex)
     logger.LogError(ex, "A problem occurred during migration");
 }
 
-app.Run();
+await app.RunAsync();
